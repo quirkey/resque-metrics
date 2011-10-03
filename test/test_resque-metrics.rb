@@ -1,7 +1,9 @@
 require 'helper'
 
-class TestResqueMetrics < Test::Unit::TestCase
-  should "probably rename this file and start testing for real" do
-    flunk "hey buddy, you should probably rename this file and start testing for real"
+class TestResqueMetrics < MiniTest::Unit::TestCase
+
+  def test_should_pass_resque_plugin_lint
+    assert Resque::Plugin.lint(Resque::Metrics)
   end
+
 end
