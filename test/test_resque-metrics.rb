@@ -42,8 +42,12 @@ class TestResqueMetrics < MiniTest::Unit::TestCase
 
   def test_should_call_callbacks
     recorded = []
+    recorded_count = 0
     Resque::Metrics.on_job do |klass, queue, time|
       recorded << [klass, queue, time]
+    end
+    Resque::Metrics.on_job do |klass, queue, time|
+      recorded_count += 1
     end
     work_job
     work_job
@@ -51,6 +55,7 @@ class TestResqueMetrics < MiniTest::Unit::TestCase
     assert_equal SomeJob, recorded[0][0]
     assert_equal :jobs, recorded[0][1]
     assert recorded[0][2] > 0
+    assert_equal 2, recorded_count
   end
 
   private
