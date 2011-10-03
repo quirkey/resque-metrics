@@ -12,6 +12,8 @@ require 'minitest/autorun'
 
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
+$TESTING = true
+
 require 'resque/metrics'
 
 #
@@ -48,3 +50,14 @@ end
 puts "Starting redis for testing at localhost:9736..."
 `redis-server #{dir}/redis-test.conf`
 Resque.redis = 'localhost:9736:2'
+
+class SomeJob
+  extend Resque::Metrics
+
+  @queue = :jobs
+
+  def self.perform(x, y)
+    sleep rand * 0.01
+  end
+
+end
