@@ -76,9 +76,9 @@ module Resque
         increment_metric "fork_count:queue:#{queue}"
         increment_metric "fork_count:job:#{job_class}"
       end
-      increment_metric "avg_fork_time", total_fork_time / total_fork_count
-      increment_metric "avg_fork_time:queue:#{queue}", total_fork_time_by_queue(queue) / total_fork_count_by_queue(queue)
-      increment_metric "avg_fork_time:job:#{job_class}", total_fork_time_by_job(job_class) / total_fork_count_by_job(job_class)
+      set_metric "avg_fork_time", total_fork_time / total_fork_count
+      set_metric "avg_fork_time:queue:#{queue}", total_fork_time_by_queue(queue) / total_fork_count_by_queue(queue)
+      set_metric "avg_fork_time:job:#{job_class}", total_fork_time_by_job(job_class) / total_fork_count_by_job(job_class)
       run_callback(:on_job_fork, job_class, queue, time)
     end
 
@@ -101,14 +101,18 @@ module Resque
         increment_metric "job_count:queue:#{queue}"
         increment_metric "job_count:job:#{job_class}"
       end
-      increment_metric "avg_job_time", total_job_time / total_job_count
-      increment_metric "avg_job_time:queue:#{queue}", total_job_time_by_queue(queue) / total_job_count_by_queue(queue)
-      increment_metric "avg_job_time:job:#{job_class}", total_job_time_by_job(job_class) / total_job_count_by_job(job_class)
+      set_metric "avg_job_time", total_job_time / total_job_count
+      set_metric "avg_job_time:queue:#{queue}", total_job_time_by_queue(queue) / total_job_count_by_queue(queue)
+      set_metric "avg_job_time:job:#{job_class}", total_job_time_by_job(job_class) / total_job_count_by_job(job_class)
       run_callback(:on_job_complete, job_class, queue, time)
     end
 
     def self.increment_metric(metric, by = 1)
       redis.incrby("_metrics_:#{metric}", by)
+    end
+
+    def self.set_metric(metric, val)
+      redis.incrby("_metrics_:#{metric}", val)
     end
 
     def self.get_metric(metric)
