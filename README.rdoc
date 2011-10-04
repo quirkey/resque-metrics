@@ -56,7 +56,8 @@ If you do define you're own fork hooks:
     # Resque::Metrics.(before/after)_fork just returns a lambda so just assign it if you like
     Resque.after_fork = Resque::Metrics.after_fork
 
-Once enabled this will add `.*_fork_*` methods like `avg_fork_time`, etc.
+Once enabled this will add `.*_fork_*` methods like `avg_fork_time`, etc. 
+Latest Resque is required for fork recording to work.
 
 === Callbacks/Hooks
 

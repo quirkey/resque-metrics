@@ -17,8 +17,12 @@ Jeweler::Tasks.new do |gem|
   gem.name = "resque-metrics"
   gem.homepage = "http://github.com/quirkey/resque-metrics"
   gem.license = "MIT"
-  gem.summary = %Q{TODO: one-line summary of your gem}
-  gem.description = %Q{TODO: longer description of your gem}
+  gem.summary = %Q{A Resque plugin for recording simple metrics for your jobs}
+  gem.description = <<-desc
+A simple Resque plugin that times and saves some simple metrics for Resque jobs back into redis. Based on this system
+you could build some simple auto-scaling mechanism based on the speed and ETA of queues. Also includes a hook/callback
+mechanism for recording/sending the metrics to your favorite tool (AKA statsd/graphite).
+desc
   gem.email = "aaron@quirkey.com"
   gem.authors = ["Aaron Quint"]
   # dependencies defined in Gemfile

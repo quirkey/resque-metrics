@@ -46,5 +46,5 @@ DEPENDENCIES
   bundler (~> 1.0.0)
   jeweler (~> 1.6.2)
   minitest (>= 2)
-  resque
+  resque (~> 1.19)
   ruby-debug19
