@@ -14,8 +14,23 @@ module Resque
     end
 
     def self.on_job_complete(&block)
-      @on_job_complete_callbacks ||= []
-      @on_job_complete_callbacks << block
+      set_callback(:on_job_complete, &block)
+    end
+
+    def self.on_job_enqueue(&block)
+      set_callback(:on_job_enqueue, &block)
+    end
+
+    def self.set_callback(callback_name, &block)
+      @callbacks ||= {}
+      @callbacks[callback_name] ||= []
+      @callbacks[callback_name] << block
+    end
+
+    def self.run_callback(callback_name, *args)
+      if @callbacks && @callbacks[callback_name]
+        @callbacks[callback_name].each {|callback| callback.call(*args) }
+      end
     end
 
     def self.record_job_enqueue(job_class)
@@ -23,6 +38,7 @@ module Resque
       increment_metric "enqueue_count"
       increment_metric "enqueue_count:job:#{job_class}"
       increment_metric "enqueue_count:queue:#{queue}"
+      run_callback(:on_job_enqueue, job_class, queue)
       true
     end
 
@@ -39,9 +55,7 @@ module Resque
       increment_metric "avg_job_time", total_job_time / total_job_count
       increment_metric "avg_job_time:queue:#{queue}", total_job_time_by_queue(queue) / total_job_count_by_queue(queue)
       increment_metric "avg_job_time:job:#{job_class}", total_job_time_by_job(job_class) / total_job_count_by_job(job_class)
-      if @on_job_complete_callbacks
-        @on_job_complete_callbacks.each {|callback| callback.call(job_class, queue, time) }
-      end
+      run_callback(:on_job_complete, job_class, queue, time)
     end
 
     def self.increment_metric(metric, by = 1)
