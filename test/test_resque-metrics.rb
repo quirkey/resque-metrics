@@ -8,8 +8,9 @@ class TestResqueMetrics < MiniTest::Unit::TestCase
     Resque.before_fork = nil
     Resque.after_fork = nil
 
+    @num_jobs = 4
     @worker = Resque::Worker.new(:jobs)
-    4.times do
+    @num_jobs.times do
       work_job
     end
   end
@@ -28,6 +29,12 @@ class TestResqueMetrics < MiniTest::Unit::TestCase
     assert Resque::Metrics.total_job_time_by_job(SomeJob) > 0
   end
 
+  def test_should_record_enqueue_count
+    assert_equal @num_jobs, Resque::Metrics.total_enqueue_count
+    assert_equal @num_jobs, Resque::Metrics.total_enqueue_count_by_queue(:jobs)
+    assert_equal @num_jobs, Resque::Metrics.total_enqueue_count_by_job(SomeJob)
+  end
+
   def test_should_record_job_count
     assert Resque::Metrics.total_job_count > 0
     assert Resque::Metrics.total_job_count_by_queue(:jobs) > 0
@@ -43,10 +50,10 @@ class TestResqueMetrics < MiniTest::Unit::TestCase
   def test_should_call_callbacks
     recorded = []
     recorded_count = 0
-    Resque::Metrics.on_job do |klass, queue, time|
+    Resque::Metrics.on_job_complete do |klass, queue, time|
       recorded << [klass, queue, time]
     end
-    Resque::Metrics.on_job do |klass, queue, time|
+    Resque::Metrics.on_job_complete do |klass, queue, time|
       recorded_count += 1
     end
     work_job
