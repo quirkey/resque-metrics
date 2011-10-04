@@ -10,7 +10,16 @@ module Resque
     end
 
     def self.redis
-      Resque.redis
+      ::Resque.redis
+    end
+
+    def self.watch_fork
+      ::Resque.before_fork = before_fork
+      ::Resque.after_fork = after_fork
+    end
+
+    def self.on_job_fork(&block)
+      set_callback(:on_job_fork, &block)
     end
 
     def self.on_job_complete(&block)
@@ -31,6 +40,46 @@ module Resque
       if @callbacks && @callbacks[callback_name]
         @callbacks[callback_name].each {|callback| callback.call(*args) }
       end
+    end
+
+    def self.before_fork
+      lambda do |job|
+        start = Time.now.to_f * 1000
+        key = "_metrics_:fork_start:#{job.worker.to_s}"
+        ::Resque.redis.set key, start
+        ::Resque.redis.expire key, 60 * 60 * 60
+        true
+      end
+    end
+
+    def self.after_fork
+      lambda do |job|
+        end_time = Time.now.to_f * 1000
+        key = "_metrics_:fork_start:#{job.worker.to_s}"
+        start_time = ::Resque.redis.get key
+        if start_time
+          total = (end_time - start_time.to_f).to_i
+          ::Resque::Metrics.record_job_fork(job, total)
+        end
+        true
+      end
+    end
+
+    def self.record_job_fork(job, time)
+      job_class = job.payload_class
+      queue = job.queue
+      redis.multi do
+        increment_metric "fork_time", time
+        increment_metric "fork_time:queue:#{queue}", time
+        increment_metric "fork_time:job:#{job_class}", time
+        increment_metric "fork_count"
+        increment_metric "fork_count:queue:#{queue}"
+        increment_metric "fork_count:job:#{job_class}"
+      end
+      increment_metric "avg_fork_time", total_fork_time / total_fork_count
+      increment_metric "avg_fork_time:queue:#{queue}", total_fork_time_by_queue(queue) / total_fork_count_by_queue(queue)
+      increment_metric "avg_fork_time:job:#{job_class}", total_fork_time_by_job(job_class) / total_fork_count_by_job(job_class)
+      run_callback(:on_job_fork, job_class, queue, time)
     end
 
     def self.record_job_enqueue(job_class)
@@ -112,6 +161,42 @@ module Resque
 
     def self.total_job_count_by_job(job)
       get_metric "job_count:job:#{job}"
+    end
+
+    def self.avg_fork_time
+      get_metric "avg_fork_time"
+    end
+
+    def self.avg_fork_time_by_queue(queue)
+      get_metric "avg_fork_time:queue:#{queue}"
+    end
+
+    def self.avg_fork_time_by_job(job)
+      get_metric "avg_fork_time:job:#{job}"
+    end
+
+    def self.total_fork_time
+      get_metric "fork_time"
+    end
+
+    def self.total_fork_time_by_queue(queue)
+      get_metric "fork_time:queue:#{queue}"
+    end
+
+    def self.total_fork_time_by_job(job)
+      get_metric "fork_time:job:#{job}"
+    end
+
+    def self.total_fork_count
+      get_metric "fork_count"
+    end
+
+    def self.total_fork_count_by_queue(queue)
+      get_metric "fork_count:queue:#{queue}"
+    end
+
+    def self.total_fork_count_by_job(job)
+      get_metric "fork_count:job:#{job}"
     end
 
     module Hooks
