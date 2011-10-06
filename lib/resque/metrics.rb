@@ -112,7 +112,7 @@ module Resque
     end
 
     def self.set_metric(metric, val)
-      redis.incrby("_metrics_:#{metric}", val)
+      redis.set("_metrics_:#{metric}", val)
     end
 
     def self.get_metric(metric)
