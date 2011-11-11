@@ -82,12 +82,22 @@ module Resque
       run_callback(:on_job_fork, job_class, queue, time)
     end
 
-    def self.record_job_enqueue(job_class)
+    def self.record_job_enqueue(job_class, *args)
       queue = Resque.queue_from_class(job_class)
       increment_metric "enqueue_count"
       increment_metric "enqueue_count:job:#{job_class}"
       increment_metric "enqueue_count:queue:#{queue}"
-      run_callback(:on_job_enqueue, job_class, queue)
+
+      size = Resque.encode(args).length
+      redis.multi do
+        increment_metric "payload_size", size
+        increment_metric "payload_size:queue:#{queue}", size
+        increment_metric "payload_size:job:#{job_class}", size
+      end
+      set_metric "avg_payload_size", total_payload_size / total_enqueue_count
+      set_metric "avg_payload_size:queue:#{queue}", total_payload_size_by_queue(queue) / total_enqueue_count_by_queue(queue)
+      set_metric "avg_payload_size:job:#{job_class}", total_payload_size_by_job(job_class) / total_enqueue_count_by_job(job_class)
+      run_callback(:on_job_enqueue, job_class, queue, size)
       true
     end
 
@@ -167,6 +177,30 @@ module Resque
       get_metric "job_count:job:#{job}"
     end
 
+    def self.total_payload_size
+      get_metric "payload_size"
+    end
+
+    def self.total_payload_size_by_queue(queue)
+      get_metric "payload_size:queue:#{queue}"
+    end
+
+    def self.total_payload_size_by_job(job)
+      get_metric "payload_size:job:#{job}"
+    end
+
+    def self.avg_payload_size
+      get_metric "avg_payload_size"
+    end
+
+    def self.avg_payload_size_by_queue(queue)
+      get_metric "avg_payload_size:queue:#{queue}"
+    end
+
+    def self.avg_payload_size_by_job(job)
+      get_metric "avg_payload_size:job:#{job}"
+    end
+
     def self.avg_fork_time
       get_metric "avg_fork_time"
     end
@@ -206,7 +240,7 @@ module Resque
     module Hooks
 
       def after_enqueue_metrics(*args)
-        Resque::Metrics.record_job_enqueue(self)
+        Resque::Metrics.record_job_enqueue(self, *args)
       end
 
       def around_perform_metrics(*args)

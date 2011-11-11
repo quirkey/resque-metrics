@@ -41,6 +41,12 @@ class TestResqueMetrics < MiniTest::Unit::TestCase
     assert Resque::Metrics.total_job_count_by_job(SomeJob) > 0
   end
 
+  def test_should_record_payload_size
+    assert Resque::Metrics.total_payload_size > 0
+    assert Resque::Metrics.total_payload_size_by_queue(:jobs) > 0
+    assert Resque::Metrics.total_payload_size_by_job(SomeJob) > 0
+  end
+
   def test_should_record_avg_job_time
     assert Resque::Metrics.avg_job_time > 0
     assert Resque::Metrics.avg_job_time_by_queue(:jobs) > 0
