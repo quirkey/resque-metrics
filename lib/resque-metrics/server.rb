@@ -1,4 +1,5 @@
 require 'resque/server'
+require 'resque/metrics'
 
 # Extend Resque::Server to add tabs
 module Resque
@@ -38,4 +39,8 @@ module Resque
       Resque::Server.tabs << 'Metrics'
     end
   end
+end
+
+Resque::Server.class_eval do
+  include Resque::Metrics::Server
 end
