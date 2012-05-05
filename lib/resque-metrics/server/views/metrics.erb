@@ -8,8 +8,10 @@
     </tr>
 
     <% resque.queues.each do |queue| %>
-      <td class="queue"><a href="<%=u "queues/#{queue}" %>"><%= queue %></a></td>
-      <td class="size"><%= Resque::Metrics.total_job_count_by_queue(queue) %></td>
+      <tr>
+        <td class="queue"><a href="<%=u "queues/#{queue}" %>"><%= queue %></a></td>
+        <td class="size"><%= Resque::Metrics.total_job_count_by_queue(queue) %></td>
+      </tr>
     <% end %>
 
     <tr class="failed">
@@ -27,8 +29,10 @@
     </tr>
 
     <% resque.queues.each do |queue| %>
-      <td class="queue"><a href="<%=u "queues/#{queue}" %>"><%= queue %></a></td>
-      <td class="size"><%= metrics_formatted_ms(Resque::Metrics.avg_job_time_by_queue(queue)) %></td>
+      <tr>
+        <td class="queue"><a href="<%=u "queues/#{queue}" %>"><%= queue %></a></td>
+        <td class="size"><%= metrics_formatted_ms(Resque::Metrics.avg_job_time_by_queue(queue)) %></td>
+      </tr>
     <% end %>
 
     <tr class="failed">
@@ -46,8 +50,10 @@
     </tr>
 
     <% resque.queues.each do |queue| %>
-      <td class="queue"><a href="<%=u "queues/#{queue}" %>"><%= queue %></a></td>
-      <td class="size"><%= metrics_formatted_ms(Resque::Metrics.total_job_time_by_queue(queue)) %></td>
+      <tr>
+        <td class="queue"><a href="<%=u "queues/#{queue}" %>"><%= queue %></a></td>
+        <td class="size"><%= metrics_formatted_ms(Resque::Metrics.total_job_time_by_queue(queue)) %></td>
+      </tr>
     <% end %>
 
     <tr class="failed">
