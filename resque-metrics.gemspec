@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "resque-metrics"
-  s.version = "0.0.3"
+  s.version = "0.0.4"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Aaron Quint"]
-  s.date = "2011-11-17"
+  s.date = "2012-11-15"
   s.description = "A simple Resque plugin that times and saves some simple metrics for Resque jobs back into redis. Based on this system\nyou could build some simple auto-scaling mechanism based on the speed and ETA of queues. Also includes a hook/callback\nmechanism for recording/sending the metrics to your favorite tool (AKA statsd/graphite).\n"
   s.email = "aaron@quirkey.com"
   s.extra_rdoc_files = [
@@ -34,7 +34,7 @@ Gem::Specification.new do |s|
   s.homepage = "http://github.com/quirkey/resque-metrics"
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
-  s.rubygems_version = "1.8.10"
+  s.rubygems_version = "1.8.23"
   s.summary = "A Resque plugin for recording simple metrics for your jobs"
 
   if s.respond_to? :specification_version then
