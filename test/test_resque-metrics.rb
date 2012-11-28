@@ -71,20 +71,6 @@ class TestResqueMetrics < MiniTest::Unit::TestCase
     assert_equal 2, recorded_count
   end
 
-  def test_should_record_fork_times
-    Resque::Metrics.watch_fork
-    Resque.after_fork do |job|
-      sleep 0.1
-      Resque::Metrics.after_fork.call(job)
-    end
-    work_job
-    work_job
-    assert_equal 2, Resque::Metrics.total_fork_count
-    assert Resque::Metrics.avg_fork_time > 0
-    assert Resque::Metrics.avg_fork_time_by_queue(:jobs) > 0
-    assert Resque::Metrics.avg_fork_time_by_job(SomeJob) > 0
-  end
-
   private
   def work_job
     Resque.enqueue(SomeJob, 20, '/tmp')
