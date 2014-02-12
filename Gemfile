@@ -12,6 +12,6 @@ group :development do
     gem "ruby-debug19"
   end
   gem 'minitest', '>=2'
-  gem "bundler", "~> 1.0.0"
-  gem "jeweler", "~> 1.6.2"
+  gem "bundler"
+  gem "jeweler"
 end
