@@ -3,14 +3,20 @@ require 'resque'
 module Resque
   module Metrics
 
-    VERSION = '0.0.1'
-
     def self.extended(klass)
       klass.extend(Hooks)
     end
 
     def self.redis
       ::Resque.redis
+    end
+
+    def self.use_multi=(multi)
+      @_use_multi = multi
+    end
+
+    def self.use_multi?
+      @_use_multi
     end
 
     def self.watch_fork
@@ -68,7 +74,7 @@ module Resque
     def self.record_job_fork(job, time)
       job_class = job.payload_class
       queue = job.queue
-      redis.multi do
+      multi do
         increment_metric "fork_time", time
         increment_metric "fork_time:queue:#{queue}", time
         increment_metric "fork_time:job:#{job_class}", time
@@ -89,7 +95,7 @@ module Resque
       increment_metric "enqueue_count:queue:#{queue}"
 
       size = Resque.encode(args).length
-      redis.multi do
+      multi do
         increment_metric "payload_size", size
         increment_metric "payload_size:queue:#{queue}", size
         increment_metric "payload_size:job:#{job_class}", size
@@ -103,7 +109,7 @@ module Resque
 
     def self.record_job_completion(job_class, time)
       queue = Resque.queue_from_class(job_class)
-      redis.multi do
+      multi do
         increment_metric "job_time", time
         increment_metric "job_time:queue:#{queue}", time
         increment_metric "job_time:job:#{job_class}", time
@@ -115,6 +121,10 @@ module Resque
       set_avg "avg_job_time:queue:#{queue}", total_job_time_by_queue(queue) , total_job_count_by_queue(queue)
       set_avg "avg_job_time:job:#{job_class}", total_job_time_by_job(job_class) , total_job_count_by_job(job_class)
       run_callback(:on_job_complete, job_class, queue, time)
+    end
+
+    def self.multi(&block)
+      use_multi? ? redis.multi(&block) : yield
     end
 
     def self.increment_metric(metric, by = 1)
