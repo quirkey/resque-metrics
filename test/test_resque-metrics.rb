@@ -13,6 +13,11 @@ class TestResqueMetrics < MiniTest::Unit::TestCase
     @num_jobs.times do
       work_job
     end
+
+    @num_failed_jobs = 2
+    @num_failed_jobs.times do 
+      fail_job
+    end
   end
 
   def test_should_pass_resque_plugin_lint
@@ -30,9 +35,10 @@ class TestResqueMetrics < MiniTest::Unit::TestCase
   end
 
   def test_should_record_enqueue_count
-    assert_equal @num_jobs, Resque::Metrics.total_enqueue_count
-    assert_equal @num_jobs, Resque::Metrics.total_enqueue_count_by_queue(:jobs)
+    assert_equal @num_jobs + @num_failed_jobs, Resque::Metrics.total_enqueue_count
+    assert_equal @num_jobs + @num_failed_jobs, Resque::Metrics.total_enqueue_count_by_queue(:jobs)
     assert_equal @num_jobs, Resque::Metrics.total_enqueue_count_by_job(SomeJob)
+    assert_equal @num_failed_jobs, Resque::Metrics.total_enqueue_count_by_job(FailureJob)
   end
 
   def test_should_record_job_count
@@ -62,8 +68,10 @@ class TestResqueMetrics < MiniTest::Unit::TestCase
     Resque::Metrics.on_job_complete do |klass, queue, time|
       recorded_count += 1
     end
+
     work_job
     work_job
+
     assert_equal 2, recorded.length
     assert_equal SomeJob, recorded[0][0]
     assert_equal :jobs, recorded[0][1]
@@ -72,8 +80,14 @@ class TestResqueMetrics < MiniTest::Unit::TestCase
   end
 
   private
+
   def work_job
     Resque.enqueue(SomeJob, 20, '/tmp')
+    @worker.work(0)
+  end
+
+  def fail_job
+    Resque.enqueue(FailureJob)
     @worker.work(0)
   end
 
