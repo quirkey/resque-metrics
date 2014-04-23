@@ -67,3 +67,13 @@ class SomeJob
   end
 
 end
+
+class FailureJob
+  extend Resque::Metrics
+
+  @queue = :jobs
+
+  def self.perform
+    fail "nope"
+  end
+end
