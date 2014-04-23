@@ -59,7 +59,7 @@ class TestResqueMetrics < MiniTest::Unit::TestCase
     assert Resque::Metrics.avg_job_time_by_job(SomeJob) > 0
   end
 
-  def test_should_call_callbacks
+  def test_should_call_job_complete_callbacks
     recorded = []
     recorded_count = 0
     Resque::Metrics.on_job_complete do |klass, queue, time|
