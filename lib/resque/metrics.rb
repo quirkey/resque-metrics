@@ -36,6 +36,10 @@ module Resque
       set_callback(:on_job_enqueue, &block)
     end
 
+    def self.on_job_failure(&block)
+      set_callback(:on_job_failure, &block)
+    end
+
     def self.set_callback(callback_name, &block)
       @callbacks ||= {}
       @callbacks[callback_name] ||= []
@@ -121,6 +125,18 @@ module Resque
       set_avg "avg_job_time:queue:#{queue}", total_job_time_by_queue(queue) , total_job_count_by_queue(queue)
       set_avg "avg_job_time:job:#{job_class}", total_job_time_by_job(job_class) , total_job_count_by_job(job_class)
       run_callback(:on_job_complete, job_class, queue, time)
+    end
+
+    def self.record_job_failure(job_class, e)
+      queue = Resque.queue_from_class(job_class)
+      
+      multi do
+        increment_metric "failure_count"
+        increment_metric "failure_count:queue:#{queue}"
+        increment_metric "failure_count:job:#{job_class}"
+      end
+      
+      run_callback(:on_job_failure, job_class, queue, time)
     end
 
     def self.multi(&block)
@@ -263,6 +279,10 @@ module Resque
         yield
         finish = ((Time.now.to_f - start.to_f) * 1000).to_i
         Resque::Metrics.record_job_completion(self, finish)
+      end
+
+      def on_failure_metrics(e, *args)
+        Resque::Metrics.record_job_failure(self, e)
       end
 
     end
