@@ -136,7 +136,7 @@ module Resque
         increment_metric "failed_job_count:job:#{job_class}"
       end
       
-      run_callback(:on_job_failure, job_class, queue, time)
+      run_callback(:on_job_failure, job_class, queue)
     end
 
     def self.multi(&block)
