@@ -69,7 +69,7 @@ class TestResqueMetrics < MiniTest::Unit::TestCase
     recorded = []
     recorded_count = 0
     Resque::Metrics.on_job_complete do |klass, queue, time|
-      recorded << [klass, queue, time]
+      recorded << {:klass => klass, :queue => queue, :time => time }
     end
     Resque::Metrics.on_job_complete do |klass, queue, time|
       recorded_count += 1
@@ -79,9 +79,9 @@ class TestResqueMetrics < MiniTest::Unit::TestCase
     work_job
 
     assert_equal 2, recorded.length
-    assert_equal SomeJob, recorded[0][0]
-    assert_equal :jobs, recorded[0][1]
-    assert recorded[0][2] > 0, "Expected #{recorded[0][2]} to be > 0, but wasn't"
+    assert_equal SomeJob, recorded[0][:klass]
+    assert_equal :jobs, recorded[0][:queue]
+    assert recorded[0][:time] > 0, "Expected #{recorded[0][:time]} to be > 0, but wasn't"
     assert_equal 2, recorded_count
   end
 
