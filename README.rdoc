@@ -23,8 +23,8 @@ Given a job, extend the job class with Resque::Metrics.
 
     end
 
-By default this will record the total job count, the total count of jobs enqueued, the total time the jobs took, the avg time the jobs took. It 
-will also record each of these per-queue and per-bob class. So for the job above it will record values and you will be able to fetch them
+By default this will record the total job count, the total count of jobs enqueued, the total time the jobs took, the avg time the jobs took. It will also record the total number of job failures. 
+These metrics are also tracked by queue and job class. So for the job above, it will record values and you will be able to fetch them
 with module methods:
 
     Resque::Metrics.total_job_count #=> 1
@@ -36,6 +36,9 @@ with module methods:
     Resque::Metrics.avg_job_time #=> 1000
     Resque::Metrics.avg_job_time_by_job(SomeJob) #=> 1000
     Resque::Metrics.avg_job_time_by_queue(:jobs) #=> 1000
+    Resque::Metrics.failed_job_count #=> 1
+    Resque::Metrics.failed_job_count_by_job(SomeJob) #=> 0
+    Resque::Metrics.failed_job_count_by_queue(:jobs) #=> 0
 
 All values are recorded and returned as integers. For times, values are in milliseconds.
 
@@ -64,7 +67,7 @@ Latest Resque is required for fork recording to work.
 Resque::Metrics also has a simple callback/hook system so you can send data to your favorite agent. All hooks are passed the job class,
 the queue, and the time of the metric. 
 
-    # Also `on_job_fork` and `on_job_enqueue`
+    # Also `on_job_fork`, `on_job_enqueue`, and `on_job_failure` (`on_job_failure does not include `time`)
     Resque::Metric.on_job_complete do |job_class, queue, time|
       # send to your metrics agent
       Statsd.timing "resque.#{job_class}.complete_time", time
