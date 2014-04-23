@@ -86,14 +86,12 @@ class TestResqueMetrics < MiniTest::Unit::TestCase
   end
 
   def test_should_call_job_failure_callbacks
-    skip "doesn't seem to record yet"
-
     recorded = []
     recorded_count = 0
-    Resque::Metrics.on_job_failure do |klass, queue, time|
-      recorded << {:klass => klass, :queue => queue, :time => time}
+    Resque::Metrics.on_job_failure do |klass, queue|
+      recorded << {:klass => klass, :queue => queue}
     end
-    Resque::Metrics.on_job_failure do |klass, queue, time|
+    Resque::Metrics.on_job_failure do |klass, queue|
       recorded_count += 1
     end
 
@@ -104,7 +102,6 @@ class TestResqueMetrics < MiniTest::Unit::TestCase
     assert_equal 3, recorded.length
     assert_equal FailureJob, recorded[0][:klass]
     assert_equal :jobs, recorded[0][:queue]
-    assert recorded[0][:time] > 0
     assert_equal 3, recorded_count
   end
 
