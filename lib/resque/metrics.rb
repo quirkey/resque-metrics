@@ -131,9 +131,9 @@ module Resque
       queue = Resque.queue_from_class(job_class)
       
       multi do
-        increment_metric "failure_count"
-        increment_metric "failure_count:queue:#{queue}"
-        increment_metric "failure_count:job:#{job_class}"
+        increment_metric "failed_job_count"
+        increment_metric "failed_job_count:queue:#{queue}"
+        increment_metric "failed_job_count:job:#{job_class}"
       end
       
       run_callback(:on_job_failure, job_class, queue, time)
@@ -206,6 +206,18 @@ module Resque
 
     def self.total_job_count_by_job(job)
       get_metric "job_count:job:#{job}"
+    end
+
+    def self.failed_job_count
+      get_metric "failed_job_count"
+    end
+
+    def self.failed_job_count_by_queue(queue)
+      get_metric "failed_job_count:queue:#{queue}"
+    end
+
+    def self.failed_job_count_by_job(job)
+      get_metric "failed_job_count:job:#{job}"
     end
 
     def self.total_payload_size
