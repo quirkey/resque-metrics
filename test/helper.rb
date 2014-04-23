@@ -74,6 +74,6 @@ class FailureJob
   @queue = :jobs
 
   def self.perform
-    fail "nope"
+    raise "failing lol"
   end
 end
