@@ -47,6 +47,12 @@ class TestResqueMetrics < MiniTest::Unit::TestCase
     assert Resque::Metrics.total_job_count_by_job(SomeJob) > 0
   end
 
+  def test_should_record_failed_job_count
+    assert Resque::Metrics.failed_job_count > 0, "Expected #{Resque::Metrics.failed_job_count} to be > 0, but wasn't"
+    assert Resque::Metrics.failed_job_count_by_queue(:jobs) > 0
+    assert Resque::Metrics.failed_job_count_by_job(FailureJob) > 0
+  end
+
   def test_should_record_payload_size
     assert Resque::Metrics.total_payload_size > 0
     assert Resque::Metrics.total_payload_size_by_queue(:jobs) > 0
@@ -75,7 +81,7 @@ class TestResqueMetrics < MiniTest::Unit::TestCase
     assert_equal 2, recorded.length
     assert_equal SomeJob, recorded[0][0]
     assert_equal :jobs, recorded[0][1]
-    assert recorded[0][2] > 0
+    assert recorded[0][2] > 0, "Expected #{recorded[0][2]} to be > 0, but wasn't"
     assert_equal 2, recorded_count
   end
 
