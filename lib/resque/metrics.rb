@@ -117,6 +117,8 @@ module Resque
       Resque.queues.each do |queue|
         set_metric "depth:queue:#{queue}", Resque.size(queue)
       end
+
+      true
     end
 
     def self.record_job_fork(job, time)
