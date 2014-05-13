@@ -6,7 +6,7 @@ module Resque
 
         def initialize(statsd, metric_prefix = 'resque')
           @statsd = statsd
-          @stats_prefix = stats_prefix
+          @metric_prefix = metric_prefix
         end
 
         def increment_metric(metric, by = 1)
