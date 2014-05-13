@@ -31,10 +31,10 @@ module Resque
             when 'count'
               statsd.increment key, by
             else
-              raise "Not sure how to handle #{time_or_count} metric #{metric}"
+              raise "Not sure how to increment_metric for a #{time_or_count} metric (#{metric})"
             end
           else
-            raise "Not sure how to handle metric #{metric}"
+            raise "Not sure how to increment_metric #{metric}"
           end
         end
 
