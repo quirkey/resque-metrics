@@ -2,7 +2,7 @@ module Resque
   module Metrics
     module Backends
       class Statsd
-        attr_accessor :statsd, :stats_prefix
+        attr_accessor :statsd, :metric_prefix
 
         def initialize(statsd, metric_prefix = 'resque')
           @statsd = statsd
