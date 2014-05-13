@@ -325,6 +325,18 @@ module Resque
       get_metric "fork_count:job:#{job}"
     end
 
+    def self.failed_depth
+      get_metric "depth:failed"
+    end
+
+    def self.pending_depth
+      get_metric "depth:pending"
+    end
+
+    def self.depth_by_queue(queue)
+      get_metric "depth:queue:#{queue}"
+    end
+
     module Hooks
 
       def after_enqueue_metrics(*args)
