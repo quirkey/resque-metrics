@@ -1,4 +1,5 @@
 require 'resque'
+require 'resque/metrics/backends'
 
 module Resque
   module Metrics
@@ -8,7 +9,11 @@ module Resque
     end
 
     def self.redis
-      ::Resque.redis
+      @_redis ||= ::Resque.redis
+    end
+
+    def self.redis=(redis)
+      @_redis = redis
     end
 
     def self.use_multi=(multi)
@@ -17,6 +22,36 @@ module Resque
 
     def self.use_multi?
       @_use_multi
+    end
+
+    def self.backends
+      @_backends ||= begin
+                       self.backends = [Resque::Metrics::Backends::Redis.new(redis)]
+                     end
+    end
+
+    def self.backends=(new_backends)
+      @_backends = new_backends
+    end
+
+    def self.run_backends(method, *args)
+      ran_any = false
+
+      backends.each do |backend|
+        if backend.respond_to?(method)
+          ran_any = true
+          backend.send method, *args
+        end
+      end
+
+      raise "No backend responded to #{method}: #{backends.inspect}" unless ran_any
+    end
+
+    def self.run_first_backend(method, *args)
+      backend = backends.detect {|backend| backend.respond_to?(method)}
+      raise "No backend responds to #{method}: #{backends.inspect}" unless backend
+
+      backend.send method, *args
     end
 
     def self.watch_fork
@@ -144,20 +179,19 @@ module Resque
     end
 
     def self.increment_metric(metric, by = 1)
-      redis.incrby("_metrics_:#{metric}", by)
+      run_backends(:increment_metric, metric, by)
     end
 
     def self.set_metric(metric, val)
-      redis.set("_metrics_:#{metric}", val)
+      run_backends(:set_metric, metric, val)
     end
 
     def self.set_avg(metric, num, total)
-      val = total < 1 ? 0 : num / total
-      set_metric(metric, val)
+      run_backends(:set_avg, metric, num, total)
     end
 
     def self.get_metric(metric)
-      redis.get("_metrics_:#{metric}").to_i
+      run_first_backend(:get_metric, metric)
     end
 
     def self.total_enqueue_count
