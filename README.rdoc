@@ -65,7 +65,7 @@ Resque::Metrics also has a simple callback/hook system so you can send data to y
 the queue, and the time of the metric. 
 
     # Also `on_job_fork` and `on_job_enqueue`
-    Resque::Metric.on_job_complete do |job_class, queue, time|
+    Resque::Metrics.on_job_complete do |job_class, queue, time|
       # send to your metrics agent
       Statsd.timing "resque.#{job_class}.complete_time", time
       Statsd.increment "resque.#{job_class}.complete"
