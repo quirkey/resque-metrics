@@ -10,7 +10,7 @@ module Resque
         end
 
         def increment_metric(metric, by = 1)
-          if metric =~ /(.+)(?:_job)_(time|count)(?::(queue|job):(.*))?$/
+          if metric =~ /(.+)(?:_job)?_(time|count)(?::(queue|job):(.*))?$/
             event = $1
             event = 'complete' if event == 'job'
 
