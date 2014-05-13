@@ -41,7 +41,7 @@ module Resque
         def set_metric(metric, val)
           if metric =~ /^depth(?::(failed|pending|queue)(?::(.+))?)?$/
             key = metric.gsub(':', '.')
-            statsd.count key, val
+            statsd.gauge key, val
           else
             raise "Not sure how to set_metric #{metric}"
           end
