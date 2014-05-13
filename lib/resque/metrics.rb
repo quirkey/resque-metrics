@@ -110,6 +110,15 @@ module Resque
       end
     end
 
+    def self.record_depth
+      set_metric 'depth:failed', Resque::Failure.count
+      set_metric 'depth:pending', Resque.info[:pending]
+
+      Resque.queues.each do |queue|
+        set_metric "depth:queue:#{queue}", Resque.size(queue)
+      end
+    end
+
     def self.record_job_fork(job, time)
       job_class = job.payload_class
       queue = job.queue

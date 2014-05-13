@@ -38,7 +38,15 @@ module Resque
           end
         end
 
-        # set_metric: we'll actually be dealing only in increments & timings for now
+        def set_metric(metric, val)
+          if metric =~ /^depth(?::queue:.+)$/
+            key = metric.gsub(':', '.')
+            statsd.count key, val
+          else
+            raise "Not sure how to set_metric #{metric}"
+          end
+        end
+        
         # set_avg: let statsd & graphite handle that
         # get_metric: would have to talk to graphite. but man, complicated
       end
