@@ -25,13 +25,13 @@ module Resque
                     # ie resque.complete.time
                     "#{stats_prefix}.#{event}.#{time_or_count}"
                   end
-            case event
+            case time_or_count
             when 'time'
               statsd.timing key, by
             when 'count'
               statsd.increment key, by
             else
-              raise "Not sure how to handle #{$2} metric #{metric}"
+              raise "Not sure how to handle #{time_or_count} metric #{metric}"
             end
           else
             raise "Not sure how to handle metric #{metric}"
