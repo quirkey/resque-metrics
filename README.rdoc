@@ -67,8 +67,13 @@ Latest Resque is required for fork recording to work.
 Resque::Metrics also has a simple callback/hook system so you can send data to your favorite agent. All hooks are passed the job class,
 the queue, and the time of the metric. 
 
+<<<<<<< HEAD
     # Also `on_job_fork`, `on_job_enqueue`, and `on_job_failure` (`on_job_failure does not include `time`)
     Resque::Metric.on_job_complete do |job_class, queue, time|
+=======
+    # Also `on_job_fork` and `on_job_enqueue`
+    Resque::Metrics.on_job_complete do |job_class, queue, time|
+>>>>>>> master
       # send to your metrics agent
       Statsd.timing "resque.#{job_class}.complete_time", time
       Statsd.increment "resque.#{job_class}.complete"
