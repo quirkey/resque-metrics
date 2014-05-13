@@ -39,7 +39,7 @@ module Resque
         end
 
         def set_metric(metric, val)
-          if metric =~ /^depth(?::queue:.+)$/
+          if metric =~ /^depth(?::(failed|pending|queue)(?::(.+))?)?$/
             key = metric.gsub(':', '.')
             statsd.count key, val
           else
