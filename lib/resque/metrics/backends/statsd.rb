@@ -4,7 +4,7 @@ module Resque
       class Statsd
         attr_accessor :statsd, :stats_prefix
 
-        def initialize(stats, stats_prefix = 'resque')
+        def initialize(statsd, metric_prefix = 'resque')
           @statsd = statsd
           @stats_prefix = stats_prefix
         end
@@ -19,11 +19,11 @@ module Resque
             queue_or_job_name = $4
             key = if queue_or_job && queue_or_job_name
                     # ie resque.complete.queue.high.count, resque.failed.job.Index.timing
-                    "#{stats_prefix}.#{event}.#{queue_or_job}.#{queue_or_job_name}.#{time_or_count}"
+                    "#{metric_prefix}.#{event}.#{queue_or_job}.#{queue_or_job_name}.#{time_or_count}"
                   else
 
                     # ie resque.complete.time
-                    "#{stats_prefix}.#{event}.#{time_or_count}"
+                    "#{metric_prefix}.#{event}.#{time_or_count}"
                   end
             case time_or_count
             when 'time'
