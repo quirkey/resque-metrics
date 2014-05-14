@@ -10,7 +10,7 @@ module Resque
         end
 
         def increment_metric(metric, by = 1)
-          if metric =~ /(.+)(?:_job)?_(time|count)(?::(queue|job):(.*))?$/
+          if metric =~ /^(.+)(?:_job)?_(time|count)(?::(queue|job):(.*))?$/
             event = $1
             event = 'complete' if event == 'job'
 
@@ -33,6 +33,16 @@ module Resque
             else
               raise "Not sure how to increment_metric for a #{time_or_count} metric (#{metric})"
             end
+          elsif metric =~ /^payload_size(?::(queue|job):(.*))?$/
+            queue_or_job = $1
+            queue_or_job_name = $2
+            key = if queue_or_job && queue_or_job_name
+                    # ie resque.complete.queue.high.count, resque.failed.job.Index.timing
+                    "#{metric_prefix}.payload_size.#{queue_or_job}.#{queue_or_job_name}.#{time_or_count}"
+                  else
+                    "#{metric_prefix}.payload_size.#{time_or_count}"
+                  end
+            statsd.increment key, by
           else
             raise "Not sure how to increment_metric #{metric}"
           end
