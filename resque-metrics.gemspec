@@ -28,6 +28,9 @@ Gem::Specification.new do |s|
     "VERSION",
     "lib/resque-metrics.rb",
     "lib/resque/metrics.rb",
+    "lib/resque/metrics/backends.rb",
+    "lib/resque/metrics/backends/redis.rb",
+    "lib/resque/metrics/backends/statsd.rb",
     "resque-metrics.gemspec",
     "test/helper.rb",
     "test/redis-test.conf",
@@ -62,4 +65,3 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<jeweler>, [">= 0"])
   end
 end
-
