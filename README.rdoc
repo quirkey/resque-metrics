@@ -8,6 +8,14 @@ mechanism for recording/sending the metrics to your favorite tool (AKA statsd/gr
 
     gem install resque-metrics
 
+If you are using bundler add this to your Gemfile
+
+    gem "resque-metrics"
+
+And if you want the web-ui extensions
+
+    gem "resque-metrics", :require => "resque-metrics/server"
+
 == Usage
 
 Given a job, extend the job class with Resque::Metrics.
