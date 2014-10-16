@@ -14,7 +14,7 @@ If you are using bundler add this to your Gemfile
 
 And if you want the web-ui extensions
 
-    gem "resque-metrics", :require => "resque-metrics/server"
+    gem "resque-metrics", :require => "resque/metrics/server"
 
 == Usage
 
@@ -31,7 +31,7 @@ Given a job, extend the job class with Resque::Metrics.
 
     end
 
-By default this will record the total job count, the total count of jobs enqueued, the total time the jobs took, the avg time the jobs took. It will also record the total number of job failures. 
+By default this will record the total job count, the total count of jobs enqueued, the total time the jobs took, the avg time the jobs took. It will also record the total number of job failures.
 These metrics are also tracked by queue and job class. So for the job above, it will record values and you will be able to fetch them
 with module methods:
 
@@ -52,7 +52,7 @@ All values are recorded and returned as integers. For times, values are in milli
 
 === Forking Metrics
 
-Resque::Metrics can also record forking metrics but these are not on by default as `before_fork` and `after_fork` are singluar hooks. 
+Resque::Metrics can also record forking metrics but these are not on by default as `before_fork` and `after_fork` are singluar hooks.
 If you don't need to define your own fork hooks you can simply add a line to an initializer:
 
     Resque::Metrics.watch_fork
@@ -63,11 +63,11 @@ If you do define you're own fork hooks:
       # my own fork code
       Resque::Metrics.before_fork.call(job)
     end
-    
+
     # Resque::Metrics.(before/after)_fork just returns a lambda so just assign it if you like
     Resque.after_fork = Resque::Metrics.after_fork
 
-Once enabled this will add `.*_fork_*` methods like `avg_fork_time`, etc. 
+Once enabled this will add `.*_fork_*` methods like `avg_fork_time`, etc.
 Latest Resque is required for fork recording to work.
 
 === Queue Depth Metrics
@@ -146,7 +146,7 @@ the first backend that responds_to? it.
 === Callbacks/Hooks
 
 Resque::Metrics also has a simple callback/hook system so you can send data to your favorite agent. All hooks are passed the job class,
-the queue, and the time of the metric. 
+the queue, and the time of the metric.
 
     # Also `on_job_fork`, `on_job_enqueue`, and `on_job_failure` (`on_job_failure does not include `time`)
     Resque::Metrics.on_job_complete do |job_class, queue, time|
@@ -155,9 +155,9 @@ the queue, and the time of the metric.
       Statsd.increment "resque.#{job_class}.complete"
       # etc
     end
-    
+
 == Contributing to resque-metrics
- 
+
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
 * Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it
 * Fork the project

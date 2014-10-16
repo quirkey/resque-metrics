@@ -6,7 +6,7 @@
 
 Gem::Specification.new do |s|
   s.name = "vinted-resque-metrics"
-  s.version = "0.0.8"
+  s.version = "0.0.9"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
@@ -28,9 +28,11 @@ Gem::Specification.new do |s|
     "VERSION",
     "lib/resque-metrics.rb",
     "lib/resque/metrics.rb",
+    "lib/resque/metrics/server.rb",
     "lib/resque/metrics/backends.rb",
     "lib/resque/metrics/backends/redis.rb",
     "lib/resque/metrics/backends/statsd.rb",
+    "lib/resque/metrics/server/views/metrics.erb",
     "resque-metrics.gemspec",
     "test/helper.rb",
     "test/redis-test.conf",
