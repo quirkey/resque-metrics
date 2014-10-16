@@ -143,6 +143,7 @@ module Resque
       increment_metric "enqueue_count"
       increment_metric "enqueue_count:job:#{job_class}"
       increment_metric "enqueue_count:queue:#{queue}"
+      run_first_backend(:register_job, job_class)
 
       size = Resque.encode(args).length
       multi do
@@ -175,13 +176,13 @@ module Resque
 
     def self.record_job_failure(job_class, e)
       queue = Resque.queue_from_class(job_class)
-      
+
       multi do
         increment_metric "failed_job_count"
         increment_metric "failed_job_count:queue:#{queue}"
         increment_metric "failed_job_count:job:#{job_class}"
       end
-      
+
       run_callback(:on_job_failure, job_class, queue)
     end
 
@@ -199,6 +200,10 @@ module Resque
 
     def self.set_avg(metric, num, total)
       run_backends(:set_avg, metric, num, total)
+    end
+
+    def self.known_jobs
+      run_first_backend(:known_jobs)
     end
 
     def self.get_metric(metric)
