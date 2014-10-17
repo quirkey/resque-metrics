@@ -19,7 +19,7 @@ module Resque
               hours = (seconds / 3600).floor
               minutes = (seconds % 3600) / 60
               seconds = seconds % 60
-              millis = (milliseconds - seconds * 1000)
+              millis = (milliseconds - (milliseconds / 1000) * 1000)
 
               str = []
               str << "#{hours} hours" if hours > 0
