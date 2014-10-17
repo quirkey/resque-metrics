@@ -19,12 +19,13 @@ module Resque
               hours = (seconds / 3600).floor
               minutes = (seconds % 3600) / 60
               seconds = seconds % 60
+              millis = (milliseconds - seconds * 1000)
 
               str = []
               str << "#{hours} hours" if hours > 0
-              str << "#{minutes} minutes" if minutes > 0
-              str << "#{seconds} seconds" if seconds > 0
-              str << "Less than a second" if milliseconds < 1000
+              str << "#{minutes} min" if minutes > 0
+              str << "#{seconds} sec" if seconds > 0
+              str << "#{millis} ms" if millis > 0
 
               str.join(" ")
             end
