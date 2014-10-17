@@ -62,3 +62,27 @@
     </tr>
   </tbody>
 </table>
+
+<h2>Individual job metrics</h2>
+
+<table class="workers">
+  <tbody>
+    <tr>
+      <th>Job</th>
+      <th>Total count</th>
+      <th>Failed count</th>
+      <th>Average duration</th>
+      <th>Total duration</th>
+    </tr>
+
+    <% Resque::Metrics.known_jobs.each do |job| %>
+      <tr>
+        <td class="queues queue"><%= job %></td>
+        <td class="queues queue"><%= Resque::Metrics.total_job_count_by_job(job) %></td>
+        <td class="queues queue"><%= Resque::Metrics.failed_job_count_by_job(job) %></td>
+        <td class="queues queue"><%= metrics_formatted_ms(Resque::Metrics.avg_job_time_by_job(job)) %></td>
+        <td class="process"><%= metrics_formatted_ms(Resque::Metrics.total_job_time_by_job(job)) %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

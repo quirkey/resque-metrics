@@ -25,6 +25,13 @@ module Resque
           redis.get("_metrics_:#{metric}").to_i
         end
 
+        def register_job(job)
+          redis.sadd('_metrics_:known_jobs', job)
+        end
+
+        def known_jobs
+          redis.smembers('_metrics_:known_jobs')
+        end
       end
     end
   end
