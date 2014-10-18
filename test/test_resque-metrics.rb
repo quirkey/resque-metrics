@@ -13,6 +13,11 @@ class TestResqueMetrics < MiniTest::Unit::TestCase
     @num_jobs.times do
       work_job
     end
+
+    @num_failed_jobs = 2
+    @num_failed_jobs.times do 
+      fail_job
+    end
   end
 
   def test_should_pass_resque_plugin_lint
@@ -30,15 +35,22 @@ class TestResqueMetrics < MiniTest::Unit::TestCase
   end
 
   def test_should_record_enqueue_count
-    assert_equal @num_jobs, Resque::Metrics.total_enqueue_count
-    assert_equal @num_jobs, Resque::Metrics.total_enqueue_count_by_queue(:jobs)
+    assert_equal @num_jobs + @num_failed_jobs, Resque::Metrics.total_enqueue_count
+    assert_equal @num_jobs + @num_failed_jobs, Resque::Metrics.total_enqueue_count_by_queue(:jobs)
     assert_equal @num_jobs, Resque::Metrics.total_enqueue_count_by_job(SomeJob)
+    assert_equal @num_failed_jobs, Resque::Metrics.total_enqueue_count_by_job(FailureJob)
   end
 
   def test_should_record_job_count
     assert Resque::Metrics.total_job_count > 0
     assert Resque::Metrics.total_job_count_by_queue(:jobs) > 0
     assert Resque::Metrics.total_job_count_by_job(SomeJob) > 0
+  end
+
+  def test_should_record_failed_job_count
+    assert Resque::Metrics.failed_job_count > 0, "Expected #{Resque::Metrics.failed_job_count} to be > 0, but wasn't"
+    assert Resque::Metrics.failed_job_count_by_queue(:jobs) > 0
+    assert Resque::Metrics.failed_job_count_by_job(FailureJob) > 0
   end
 
   def test_should_record_payload_size
@@ -53,27 +65,55 @@ class TestResqueMetrics < MiniTest::Unit::TestCase
     assert Resque::Metrics.avg_job_time_by_job(SomeJob) > 0
   end
 
-  def test_should_call_callbacks
+  def test_should_call_job_complete_callbacks
     recorded = []
     recorded_count = 0
     Resque::Metrics.on_job_complete do |klass, queue, time|
-      recorded << [klass, queue, time]
+      recorded << {:klass => klass, :queue => queue, :time => time }
     end
     Resque::Metrics.on_job_complete do |klass, queue, time|
       recorded_count += 1
     end
+
     work_job
     work_job
+
     assert_equal 2, recorded.length
-    assert_equal SomeJob, recorded[0][0]
-    assert_equal :jobs, recorded[0][1]
-    assert recorded[0][2] > 0
+    assert_equal SomeJob, recorded[0][:klass]
+    assert_equal :jobs, recorded[0][:queue]
+    assert recorded[0][:time] > 0, "Expected #{recorded[0][:time]} to be > 0, but wasn't"
     assert_equal 2, recorded_count
   end
 
+  def test_should_call_job_failure_callbacks
+    recorded = []
+    recorded_count = 0
+    Resque::Metrics.on_job_failure do |klass, queue|
+      recorded << {:klass => klass, :queue => queue}
+    end
+    Resque::Metrics.on_job_failure do |klass, queue|
+      recorded_count += 1
+    end
+
+    fail_job
+    fail_job
+    fail_job
+
+    assert_equal 3, recorded.length
+    assert_equal FailureJob, recorded[0][:klass]
+    assert_equal :jobs, recorded[0][:queue]
+    assert_equal 3, recorded_count
+  end
+
   private
+
   def work_job
     Resque.enqueue(SomeJob, 20, '/tmp')
+    @worker.work(0)
+  end
+
+  def fail_job
+    Resque.enqueue(FailureJob)
     @worker.work(0)
   end
 
