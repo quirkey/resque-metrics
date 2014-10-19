@@ -24,7 +24,7 @@ you could build some simple auto-scaling mechanism based on the speed and ETA of
 mechanism for recording/sending the metrics to your favorite tool (AKA statsd/graphite).
 desc
   gem.email = "aaron@quirkey.com"
-  gem.authors = ["Aaron Quint"]
+  gem.authors = ["Aaron Quint", "Josh Nichols", "Michael Smith", "Tomas Varaneckas"]  
   # dependencies defined in Gemfile
 end
 Jeweler::RubygemsDotOrgTasks.new
