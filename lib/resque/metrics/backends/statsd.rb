@@ -38,9 +38,9 @@ module Resque
             queue_or_job_name = $2
             key = if queue_or_job && queue_or_job_name
                     # ie resque.complete.queue.high.count, resque.failed.job.Index.timing
-                    "#{metric_prefix}.payload_size.#{queue_or_job}.#{queue_or_job_name}.#{time_or_count}"
+                    "#{metric_prefix}.payload_size.#{queue_or_job}.#{queue_or_job_name}.count"
                   else
-                    "#{metric_prefix}.payload_size.#{time_or_count}"
+                    "#{metric_prefix}.payload_size.count"
                   end
             statsd.increment key, by
           else
