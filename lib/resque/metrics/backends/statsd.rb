@@ -29,7 +29,7 @@ module Resque
             when 'time'
               statsd.timing key, by
             when 'count'
-              statsd.increment key, by
+              statsd.count key, by
             else
               raise "Not sure how to increment_metric for a #{time_or_count} metric (#{metric})"
             end
@@ -42,7 +42,7 @@ module Resque
                   else
                     "#{metric_prefix}.payload_size.#{time_or_count}"
                   end
-            statsd.increment key, by
+            statsd.count key, by
           else
             raise "Not sure how to increment_metric #{metric}"
           end
@@ -56,7 +56,7 @@ module Resque
             raise "Not sure how to set_metric #{metric}"
           end
         end
-        
+
         # set_avg: let statsd & graphite handle that
         # get_metric: would have to talk to graphite. but man, complicated
       end
